@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif: Pemahaman Tekstual</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        rg: {
+                            darkteal: '#0A3C42',
+                            teal: '#17838E',
+                            lightteal: '#5DC3D1',
+                            cyan: '#80DDE6',
+                            brown: '#985C19',
+                            orange: '#FCA441',
+                            peach: '#FCD195',
+                            lightorange: '#F9BE73',
+                            darkgrey: '#404040',
+                            black: '#232323',
+                            bg: '#FAFAFA'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #FAFAFA; color: #232323; }
+        .text-reading { line-height: 1.7; font-size: 1.05rem; }
+        .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); }
+        .smooth-transition { transition: all 0.3s ease; }
+        .bg-pattern {
+            background-image: radial-gradient(#FCA441 1px, transparent 1px), radial-gradient(#17838E 1px, transparent 1px);
+            background-position: 0 0, 20px 20px;
+            background-size: 40px 40px;
+            opacity: 0.05;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- DATA SOAL ---
+        const quizzes = [
+            {
+                id: 1,
+                title: "Makna Kata, Objek, dan Latar",
+                theme: "teal",
+                colorCode: "rg-teal",
+                lightColor: "rg-cyan",
+                textTitle: "Petualangan di Laboratorium Sekolah",
+                textBody: [
+                    "Dina berdiri di depan meja percobaan dengan mata penuh semangat. Hari ini, guru kimia akan mengajarkan tentang proses kristalisasi garam dapur. Sebagai ketua kelompok, Dina bertanggung jawab memastikan semua alat dan bahan telah disiapkan dengan benar.",
+                    "\"Pertama-tama, kita perlu menyiapkan larutan jenuh,\" kata Pak Ahmad sambil menunjuk ke beberapa gelas kimia di atas meja. \"Kalian harus menggunakan neraca analitik untuk menimbang garam dengan tepat.\" Dina mencatat setiap langkah dengan teliti di buku catatannya.",
+                    "Di sebelah meja percobaan, terdapat berbagai peralatan laboratorium: pipet tetes, tabung reaksi, kaca pembesar, dan termometer digital. Dina memastikan semua alat dalam kondisi bersih sebelum digunakan. Ia tahu betul bahwa kebersihan alat akan mempengaruhi akurasi hasil percobaan.",
+                    "\"Sekarang kita akan melakukan proses penguapan menggunakan pembakar bunsen,\" lanjut Pak Ahmad. \"Perhatikan suhu larutan dengan saksama. Jika suhu terlalu tinggi, kristal yang terbentuk tidak akan sempurna.\" Dina mengatur api pembakar dengan hati-hati, memastikan nyala apinya stabil.",
+                    "Selama proses percobaan berlangsung, Dina mengamati perubahan yang terjadi. Larutan yang semula jernih perlahan mulai keruh. Endapan putih mulai mengendap di dasar gelas kimia. \"Ini adalah proses pengendapan,\" gumam Dina sambil mencatat pengamatannya.",
+                    "Setelah dua jam percobaan, kristal garam terbentuk dengan sempurna. Bentuknya teratur dan berwarna putih bersih. Dina menggunakan spatula untuk mengambil kristal tersebut dan meletakkannya di atas kaca objek untuk diamati lebih detail.",
+                    "\"Percobaan hari ini sangat berhasil,\" kata Dina pada teman-temannya. \"Kita berhasil membuktikan teori kristalisasi yang dipelajari di kelas.\" Ia merasa bangga karena kelompoknya berhasil mendapatkan hasil terbaik di antara kelompok lain.",
+                    "Dina membersihkan semua peralatan dengan cermat. Ia membilas setiap alat dengan akuades dan mengeringkannya sebelum disimpan kembali. Sikap disiplin ini membuat Pak Ahmad sering memuji Dina sebagai murid teladan dalam praktikum."
+                ],
+                questions: [
+                    {
+                        type: "pg",
+                        question: "Istilah kristalisasi dalam teks merujuk pada....",
+                        options: [
+                            { id: "A", text: "proses pembentukan kristal dari larutan melalui penguapan" },
+                            { id: "B", text: "teknik pengamatan bentuk kristal menggunakan kaca pembesar" },
+                            { id: "C", text: "cara menimbang bahan kimia dengan neraca analitik" },
+                            { id: "D", text: "metode pembersihan alat laboratorium dengan akuades" }
+                        ],
+                        correct: "A",
+                        explanation: "Dalam teks, disebutkan bahwa percobaan dimulai dengan membuat \"larutan jenuh\" garam, kemudian dilakukan \"proses penguapan menggunakan pembakar bunsen\", dan akhirnya terbentuk \"kristal garam\" yang sempurna. Urutan proses ini menunjukkan bahwa kristalisasi adalah proses pembentukan kristal dari larutan melalui penguapan pelarut."
+                    },
+                    {
+                        type: "pg",
+                        question: "Objek yang menunjukkan ketelitian Dina dalam melakukan percobaan adalah....",
+                        options: [
+                            { id: "A", text: "gelas kimia dan tabung reaksi" },
+                            { id: "B", text: "neraca analitik dan termometer digital" },
+                            { id: "C", text: "pipet tetes dan pembakar bunsen" },
+                            { id: "D", text: "kaca objek dan spatula" }
+                        ],
+                        correct: "B",
+                        explanation: "Neraca analitik digunakan untuk \"menimbang garam dengan tepat\" yang menunjukkan ketelitian dalam pengukuran massa. Termometer digital digunakan untuk \"memperhatikan suhu larutan dengan saksama\" yang menunjukkan ketelitian dalam pengukuran suhu. Kedua alat ini secara eksplisit dikaitkan dengan tindakan teliti dalam teks."
+                    },
+                    {
+                        type: "pg",
+                        question: "Latar tempat dalam teks dapat diidentifikasi dengan tepat melalui kosakata....",
+                        options: [
+                            { id: "A", text: "\"meja percobaan\" dan \"peralatan laboratorium\"" },
+                            { id: "B", text: "\"gelas kimia di atas meja\" dan \"pembakar bunsen\"" },
+                            { id: "C", text: "\"buku catatan\" dan \"kaca pembesar\"" },
+                            { id: "D", text: "\"larutan jenuh\" dan \"kristal garam\"" }
+                        ],
+                        correct: "A",
+                        explanation: "\"Meja percobaan\" menunjukkan area kerja khusus dalam laboratorium, sedangkan \"peralatan laboratorium\" secara eksplisit menunjukkan bahwa kegiatan berlangsung di laboratorium. Kedua frasa ini secara langsung mengarah pada identifikasi latar tempat."
+                    },
+                    {
+                        type: "pg",
+                        question: "Berdasarkan konteks penggunaannya dalam teks, istilah \"akurasi\" memiliki makna yang paling tepat dalam bidang penelitian ilmiah adalah ....",
+                        options: [
+                            { id: "A", text: "kecepatan dalam melakukan percobaan kimia" },
+                            { id: "B", text: "ketepatan dan kebenaran hasil pengukuran" },
+                            { id: "C", text: "kemampuan mengamati perubahan dengan detail" },
+                            { id: "D", text: "keterampilan menggunakan alat laboratorium" }
+                        ],
+                        correct: "B",
+                        explanation: "Dalam konteks penelitian ilmiah, akurasi merujuk pada seberapa dekat hasil pengukuran dengan nilai sebenarnya. Kebersihan alat yang mempengaruhi \"akurasi hasil percobaan\" menunjukkan bahwa akurasi berkaitan dengan ketepatan dan kebenaran data yang diperoleh."
+                    },
+                    {
+                        type: "pg",
+                        question: "Objek yang menunjukkan tahapan sistematis dalam metode ilmiah dapat diidentifikasi melalui analisis kosakata yang menggambarkan ....",
+                        options: [
+                            { id: "A", text: "alat pengukuran yang digunakan secara berurutan" },
+                            { id: "B", text: "bahan kimia yang dicampurkan dalam proses tertentu" },
+                            { id: "C", text: "dokumentasi dan pencatatan setiap langkah percobaan" },
+                            { id: "D", text: "pembersihan dan perawatan peralatan laboratorium" }
+                        ],
+                        correct: "C",
+                        explanation: "Buku catatan dan kegiatan mencatat yang dilakukan Dina menunjukkan tahapan sistematis dalam metode ilmiah, yaitu dokumentasi yang memungkinkan percobaan dapat direplikasi dan diverifikasi."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Informasi Penting Tersurat",
+                theme: "orange",
+                colorCode: "rg-orange",
+                lightColor: "rg-peach",
+                textTitle: "Hadiah Ulang Tahun untuk Nenek",
+                textBody: [
+                    "Rani termenung di kamarnya sambil membolak-balik kalender. Besok adalah hari ulang tahun neneknya yang ke-75. Setiap tahun, Rani selalu memberikan hadiah istimewa untuk orang yang paling disayanginya itu. Tahun lalu, ia memberikan selendang rajut buatan tangannya sendiri. Tahun sebelumnya, Rani menyulam sarung bantal dengan motif bunga kesukaan nenek.",
+                    "Kali ini, Rani bingung. Ia sudah menabung selama tiga bulan dan berhasil mengumpulkan uang sebesar dua ratus ribu rupiah. Uang itu sebenarnya cukup untuk membeli perhiasan sederhana atau tas kecil yang bagus. Namun, Rani merasa hadiah yang dibeli dengan uang tidak akan bermakna seperti hadiah buatan tangannya.",
+                    "Tiba-tiba, Rani teringat percakapannya dengan nenek minggu lalu. Nenek bercerita bahwa ia sangat rindu dengan kampung halamannya di Yogyakarta. Nenek lahir dan besar di sana, tetapi sudah tiga puluh tahun tidak pernah pulang karena jarak yang jauh dan biaya perjalanan yang mahal. Nenek sering bercerita tentang gudeg Bu Lies yang sangat lezat, batik Malioboro yang indah, dan suasana Keraton yang megah.",
+                    "Mata Rani berbinar. Ia punya ide cemerlang! Meskipun tidak bisa mengajak nenek pulang ke Yogyakarta, Rani bisa membawa Yogyakarta ke rumah mereka. Ia akan memasak gudeg sendiri dengan resep yang pernah diajarkan nenek. Rani juga akan membuat album foto berisi gambar-gambar tempat bersejarah di Yogyakarta yang ia unduh dari internet. Sebagai pelengkap, ia akan menghias ruang tamu dengan ornamen khas Jogja.",
+                    "Rani yakin hadiah buatannya kali ini akan membuat nenek bahagia sekaligus bernostalgia dengan masa mudanya di Yogyakarta."
+                ],
+                questions: [
+                    {
+                        type: "pg",
+                        question: "Berapa lama Rani menabung untuk mengumpulkan uang hadiah ulang tahun neneknya?",
+                        options: [
+                            { id: "A", text: "Dua bulan" },
+                            { id: "B", text: "Tiga bulan" },
+                            { id: "C", text: "Empat bulan" },
+                            { id: "D", text: "Enam bulan" }
+                        ],
+                        correct: "B",
+                        explanation: "Informasi tersebut terdapat pada paragraf kedua kalimat kedua: \"Ia sudah menabung selama tiga bulan dan berhasil mengumpulkan uang sebesar dua ratus ribu rupiah.\""
+                    },
+                    {
+                        type: "pg-kompleks",
+                        question: "Hadiah apa saja yang pernah diberikan Rani kepada neneknya pada tahun-tahun sebelumnya? Pilihlah jawaban yang benar! Jawaban benar lebih dari satu.",
+                        options: [
+                            { id: "A", text: "Selendang rajut buatan tangan" },
+                            { id: "B", text: "Sarung bantal dengan motif bunga" },
+                            { id: "C", text: "Album foto tempat bersejarah" },
+                            { id: "D", text: "Perhiasan sederhana" }
+                        ],
+                        correct: ["A", "B"],
+                        explanation: "Pernyataan 1 dan 2 benar karena disebutkan eksplisit di paragraf pertama: \"Tahun lalu, ia memberikan selendang rajut... Tahun sebelumnya, Rani menyulam sarung bantal...\". Album foto adalah rencana tahun ini, dan perhiasan hanya pertimbangan."
+                    },
+                    {
+                        type: "pg",
+                        question: "Mengapa nenek tidak pernah pulang ke kampung halamannya selama tiga puluh tahun?",
+                        options: [
+                            { id: "A", text: "Karena sudah tidak memiliki keluarga di Yogyakarta" },
+                            { id: "B", text: "Karena jarak yang jauh dan biaya perjalanan yang mahal" },
+                            { id: "C", text: "Karena kondisi kesehatannya tidak memungkinkan" },
+                            { id: "D", text: "Karena tidak ingin meninggalkan Rani sendirian" }
+                        ],
+                        correct: "B",
+                        explanation: "Informasi ini terdapat pada paragraf ketiga: \"Nenek lahir dan besar di sana, tetapi sudah tiga puluh tahun tidak pernah pulang karena jarak yang jauh dan biaya perjalanan yang mahal.\""
+                    },
+                    {
+                        type: "sesuai-tidak",
+                        question: "Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan berikut berdasarkan informasi yang tersurat dalam teks!",
+                        options: [
+                            { id: "S1", text: "Rani memiliki uang tabungan sebesar dua ratus ribu rupiah." },
+                            { id: "S2", text: "Nenek berusia 75 tahun pada ulang tahunnya yang akan datang." },
+                            { id: "S3", text: "Gudeg Bu Lies adalah makanan yang dirindukan nenek." },
+                            { id: "S4", text: "Rani berencana mengajak nenek berlibur ke Yogyakarta." }
+                        ],
+                        correct: { "S1": "Sesuai", "S2": "Sesuai", "S3": "Sesuai", "S4": "Tidak Sesuai" },
+                        explanation: "S1 Sesuai (tersurat di paragraf 2). S2 Sesuai (tersurat di paragraf 1). S3 Sesuai (tersurat di paragraf 3). S4 Tidak Sesuai (Teks menyatakan sebaliknya: \"Meskipun tidak bisa mengajak nenek pulang ke Yogyakarta, Rani bisa membawa Yogyakarta ke rumah mereka\")."
+                    },
+                    {
+                        type: "pg",
+                        question: "Berdasarkan teks, apa saja rencana konkret Rani untuk hadiah ulang tahun neneknya tahun ini?",
+                        options: [
+                            { id: "A", text: "Memasak gudeg, membuat album foto, dan menghias ruang tamu dengan ornamen khas Yogyakarta" },
+                            { id: "B", text: "Membeli perhiasan sederhana, tas kecil, dan makanan khas Yogyakarta" },
+                            { id: "C", text: "Membuat selendang rajut, album foto, dan ornamen khas Yogyakarta" },
+                            { id: "D", text: "Memasak gudeg, mengajak nenek ke Yogyakarta, dan membeli batik Malioboro" }
+                        ],
+                        correct: "A",
+                        explanation: "Rencana konkret Rani tersurat dalam paragraf keempat: \"Ia akan memasak gudeg sendiri... membuat album foto... menghias ruang tamu dengan ornamen khas Jogja.\""
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Kerangka dan Bagan Informasi",
+                theme: "brown",
+                colorCode: "rg-brown",
+                lightColor: "rg-lightorange",
+                textTitle: "Kisah Rasa Kebersamaan di Kampung Mawar",
+                textBody: [
+                    "Kampung Mawar terkenal dengan kerukunan warganya. Setiap pagi, Pak Rahman selalu menyapa tetangganya dengan ramah sambil menyiram tanaman di halaman rumahnya. Bu Sari, tetangga sebelah, tak pernah lupa membalas sapaan sambil menjemur pakaian. Kebiasaan sederhana ini menciptakan suasana hangat yang membuat siapa pun betah tinggal di kampung tersebut.",
+                    "Namun, keharmonisan ini pernah terganggu ketika keluarga Pak Joko pindah ke Kampung Mawar. Pak Joko adalah orang yang pendiam dan jarang berinteraksi dengan tetangga. Ia lebih suka menghabiskan waktu di dalam rumah bersama keluarganya. Sikap ini membuat beberapa warga merasa Pak Joko sombong dan tidak peduli dengan lingkungan sekitar.",
+                    "Kesalahpahaman semakin memuncak ketika terjadi masalah sampah di depan rumah Pak Joko. Warga menuduh keluarga baru itu tidak menjaga kebersihan lingkungan. Tanpa bertanya langsung, beberapa tetangga mulai membicarakan Pak Joko dengan nada tidak menyenangkan. Suasana kampung yang dulunya harmonis berubah menjadi tegang dan tidak nyaman.",
+                    "Untunglah, Bu Ratna, ketua RT yang bijaksana, segera mengambil tindakan. Ia mengundang semua warga untuk berkumpul di balai kampung guna membahas masalah tersebut secara terbuka. Dalam pertemuan itu, Bu Ratna mengajak semua pihak untuk saling mendengarkan dan memahami sudut pandang masing-masing.",
+                    "Ternyata, Pak Joko menjelaskan bahwa ia memang pendiam karena masih beradaptasi dengan lingkungan baru. Ia juga merasa malu karena belum menguasai dialek setempat dengan baik. Mengenai masalah sampah, Pak Joko mengakui bahwa ia belum memahami aturan pembuangan sampah di kampung tersebut. Setelah mendengar penjelasan ini, warga mulai memahami situasi sebenarnya.",
+                    "Bu Ratna kemudian mengusulkan solusi yang konstruktif. Ia membentuk kelompok kecil yang bertugas membantu keluarga baru beradaptasi dengan kehidupan di Kampung Mawar. Kelompok ini terdiri dari beberapa warga yang sukarela membantu memberikan informasi tentang aturan-aturan kampung dan tradisi setempat.",
+                    "Hasilnya luar biasa. Pak Joko dan keluarganya merasa lebih diterima dan mulai aktif berpartisipasi dalam kegiatan kampung. Warga lain juga belajar untuk tidak terburu-buru menghakimi orang baru tanpa memahami kondisi mereka terlebih dahulu. Kampung Mawar kembali menjadi tempat yang harmonis, bahkan lebih kuat dari sebelumnya karena telah melalui ujian kebersamaan yang sesungguhnya."
+                ],
+                questions: [
+                    {
+                        type: "pg",
+                        question: "Bagan manakah yang paling tepat untuk menggambarkan alur peristiwa dalam teks tersebut?",
+                        options: [
+                            { id: "A", text: "Kedatangan Pak Joko → Kesalahpahaman warga → Intervensi Bu Ratna → Penyelesaian masalah → Keharmonisan kembali" },
+                            { id: "B", text: "Kerukunan kampung → Masalah sampah → Tuduhan warga → Pertemuan warga → Adaptasi Pak Joko" },
+                            { id: "C", text: "Keharmonisan awal → Kedatangan pendatang → Konflik berkembang → Mediasi pemimpin → Resolusi positif" },
+                            { id: "D", text: "Pak Joko pindah → Warga curiga → Bu Ratna bertindak → Pak Joko menjelaskan → Masalah selesai" }
+                        ],
+                        correct: "C",
+                        explanation: "Bagan C paling komprehensif dan logis karena menangkap seluruh dinamika cerita mulai dari kondisi awal yang harmonis, gangguan yang muncul, eskalasi konflik, upaya penyelesaian, hingga hasil akhir yang positif menggunakan terminologi yang tepat."
+                    },
+                    {
+                        type: "pg-kompleks",
+                        question: "Unsur-unsur manakah yang menjadi bagian penting dalam struktur konflik cerita tersebut? Pilihlah jawaban yang benar! Jawaban benar lebih dari satu.",
+                        options: [
+                            { id: "A", text: "Sifat pendiam Pak Joko yang disalahartikan warga" },
+                            { id: "B", text: "Kebiasaan menyapa yang dilakukan Pak Rahman setiap pagi" },
+                            { id: "C", text: "Masalah sampah yang memicu kesalahpahaman" },
+                            { id: "D", text: "Ketidakmampuan Pak Joko menguasai dialek setempat" },
+                            { id: "E", text: "Pembentukan kelompok adaptasi oleh Bu Ratna" }
+                        ],
+                        correct: ["A", "C", "D"],
+                        explanation: "Sifat pendiam (A), masalah sampah (C), dan ketidakmampuan dialek (D) adalah pemicu dan akar dari konflik. Kebiasaan menyapa (B) adalah latar belakang keharmonisan. Pembentukan kelompok adaptasi (E) adalah bagian resolusi, bukan struktur konflik."
+                    },
+                    {
+                        type: "pg",
+                        question: "Jika teks tersebut disusun dalam bentuk bagan hierarki masalah dan solusi, manakah struktur yang paling logis?",
+                        options: [
+                            { id: "A", text: "Masalah utama: Ketidakharmonisan → Penyebab: Sikap Pak Joko → Solusi: Pertemuan warga → Hasil: Kerukunan" },
+                            { id: "B", text: "Akar masalah: Kurang komunikasi → Pemicu: Kesalahpahaman → Mediator: Bu Ratna → Solusi: Kelompok adaptasi → Outcome: Integrasi" },
+                            { id: "C", text: "Konflik: Warga vs Pak Joko → Eskalasi: Tuduhan → Intervensi: RT → Klarifikasi: Penjelasan → Rekonsiliasi: Penerimaan" },
+                            { id: "D", text: "Problem: Adaptasi pendatang → Faktor: Perbedaan budaya → Proses: Dialog terbuka → Implementasi: Pendampingan → Evaluasi: Harmoni" }
+                        ],
+                        correct: "B",
+                        explanation: "Struktur B paling komprehensif dan seimbang karena mengidentifikasi akar masalah yang fundamental (kurangnya komunikasi), pemicu, peran mediator, solusi konkret, dan outcome jangka panjang (integrasi)."
+                    },
+                    {
+                        type: "sesuai-tidak",
+                        question: "Perhatikan bagan peran tokoh dalam penyelesaian konflik berikut! Tentukan Sesuai atau Tidak Sesuai untuk setiap pernyataan berdasarkan teks!",
+                        options: [
+                            { id: "T1", text: "Bu Ratna: Mediator yang mengorganisir pertemuan warga" },
+                            { id: "T2", text: "Pak Joko: Pihak yang memberikan klarifikasi dan penjelasan" },
+                            { id: "T3", text: "Kelompok Adaptasi: Kelompok yang belajar tidak menghakimi terburu-buru" },
+                            { id: "T4", text: "Pak Rahman: Tokoh yang memulai proses rekonsiliasi dengan sapaan" }
+                        ],
+                        correct: { "T1": "Sesuai", "T2": "Sesuai", "T3": "Sesuai", "T4": "Tidak Sesuai" },
+                        explanation: "T1 Sesuai (mengundang warga). T2 Sesuai (memberi penjelasan). T3 Sesuai (teks menyatakan warga belajar tidak menghakimi). T4 Tidak Sesuai (sapaan Pak Rahman terjadi di awal sebelum konflik, bukan untuk rekonsiliasi)."
+                    },
+                    {
+                        type: "pg",
+                        question: "Manakah bagan yang menunjukkan pola transformasi sosial dalam cerita tersebut dengan tepat?",
+                        options: [
+                            { id: "A", text: "Kestabilan → Gangguan → Kekacauan → Campur Tangan → Keseimbangan Baru" },
+                            { id: "B", text: "Harmoni → Gangguan → Ketegangan → Mediasi → Resolusi → Harmoni" },
+                            { id: "C", text: "Keseimbangan → Tantangan → Krisis → Solusi → Kembali Normal" },
+                            { id: "D", text: "Kedamaian → Masalah → Konflik → Penyelesaian → Pelajaran" }
+                        ],
+                        correct: "B",
+                        explanation: "Pola B paling akurat karena menangkap nuansa penting bahwa hasil akhir bukan sekadar kembali ke kondisi semula, tetapi mencapai level harmoni yang lebih kuat karena telah melalui ujian kebersamaan."
+                    }
+                ]
+            }
+        ];
+
+        // --- COMPONENTS ---
+
+        const CheckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>;
+        const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>;
+
+        const App = () => {
+            const [view, setView] = useState('menu'); // 'menu', 'quiz', 'summary', 'total'
+            const [currentQuizIndex, setCurrentQuizIndex] = useState(0);
+            const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+            const [scores, setScores] = useState({
+                1: { correct: 0, wrong: 0, completed: false },
+                2: { correct: 0, wrong: 0, completed: false },
+                3: { correct: 0, wrong: 0, completed: false }
+            });
+            const [userAnswers, setUserAnswers] = useState({}); // Menyimpan jawaban seluruh soal dalam 1 kuis
+
+            const currentQuiz = quizzes[currentQuizIndex];
+            const currentQuestion = currentQuiz?.questions[currentQuestionIndex];
+
+            const handleStartQuiz = (index) => {
+                setCurrentQuizIndex(index);
+                setCurrentQuestionIndex(0);
+                setUserAnswers({});
+                setView('quiz');
+                
+                // Reset score for this quiz if starting over
+                setScores(prev => ({
+                    ...prev,
+                    [quizzes[index].id]: { correct: 0, wrong: 0, completed: false }
+                }));
+            };
+
+            const handleAnswerSelect = (val, type, subId = null) => {
+                const currentAns = userAnswers[currentQuestionIndex];
+                
+                if (type === 'pg') {
+                    setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: val }));
+                } else if (type === 'pg-kompleks') {
+                    let newAns = currentAns ? [...currentAns] : [];
+                    if (newAns.includes(val)) {
+                        newAns = newAns.filter(item => item !== val);
+                    } else {
+                        newAns.push(val);
+                    }
+                    setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: newAns }));
+                } else if (type === 'sesuai-tidak') {
+                    const newAns = currentAns ? { ...currentAns } : {};
+                    newAns[subId] = val;
+                    setUserAnswers(prev => ({ ...prev, [currentQuestionIndex]: newAns }));
+                }
+            };
+
+            const handleNextQuestion = () => {
+                if (currentQuestionIndex < currentQuiz.questions.length - 1) {
+                    setCurrentQuestionIndex(prev => prev + 1);
+                } else {
+                    // Kalkulasi skor di akhir kuis
+                    let correctCount = 0;
+                    let wrongCount = 0;
+
+                    currentQuiz.questions.forEach((q, idx) => {
+                        const ans = userAnswers[idx];
+                        let isCorrect = false;
+
+                        if (q.type === 'pg') {
+                            isCorrect = ans === q.correct;
+                        } else if (q.type === 'pg-kompleks') {
+                            const ansArr = ans || [];
+                            isCorrect = ansArr.length === q.correct.length && ansArr.every(v => q.correct.includes(v));
+                        } else if (q.type === 'sesuai-tidak') {
+                            const ansObj = ans || {};
+                            let allRight = true;
+                            for (let key in q.correct) {
+                                if (ansObj[key] !== q.correct[key]) allRight = false;
+                            }
+                            if (Object.keys(ansObj).length < Object.keys(q.correct).length) allRight = false;
+                            isCorrect = allRight;
+                        }
+
+                        if (isCorrect) correctCount++;
+                        else wrongCount++;
+                    });
+
+                    setScores(prev => ({
+                        ...prev,
+                        [currentQuiz.id]: { ...prev[currentQuiz.id], correct: correctCount, wrong: wrongCount, completed: true }
+                    }));
+                    setView('summary');
+                }
+            };
+
+            const isAnswerComplete = () => {
+                const ans = userAnswers[currentQuestionIndex];
+                if (!ans) return false;
+                if (currentQuestion.type === 'pg') return true;
+                if (currentQuestion.type === 'pg-kompleks') return ans.length > 0;
+                if (currentQuestion.type === 'sesuai-tidak') return Object.keys(ans).length === currentQuestion.options.length;
+                return false;
+            };
+
+            // --- RENDERERS ---
+
+            const renderMenu = () => {
+                const totalCorrect = Object.values(scores).reduce((acc, curr) => curr.completed ? acc + curr.correct : acc, 0);
+                const totalWrong = Object.values(scores).reduce((acc, curr) => curr.completed ? acc + curr.wrong : acc, 0);
+                const allCompleted = Object.values(scores).every(s => s.completed);
+
+                return (
+                    <div className="min-h-screen flex flex-col items-center justify-center p-6">
+                        <div className="max-w-5xl w-full">
+                            <div className="text-center mb-12">
+                                <h1 className="text-4xl md:text-5xl font-extrabold text-rg-darkteal mb-4 tracking-tight">Kuis Pemahaman Tekstual</h1>
+                                <p className="text-lg text-gray-600 font-medium">Bahasa Indonesia Kelas 9 • Pilih kuis untuk mulai belajar</p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {quizzes.map((q, idx) => {
+                                    const score = scores[q.id];
+                                    const isDone = score.completed;
+                                    
+                                    return (
+                                        <div key={q.id} className={`glass-panel rounded-3xl p-8 flex flex-col items-center text-center smooth-transition hover:-translate-y-2 hover:shadow-2xl cursor-pointer ${isDone ? 'border-rg-teal border-2 shadow-lg' : 'shadow-md border-transparent border-2'}`} onClick={() => handleStartQuiz(idx)}>
+                                            <div className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black text-white mb-6 shadow-inner ${q.theme === 'teal' ? 'bg-rg-teal' : q.theme === 'orange' ? 'bg-rg-orange' : 'bg-rg-brown'}`}>
+                                                {q.id}
+                                            </div>
+                                            <h2 className="text-2xl font-bold text-gray-800 mb-3 leading-tight">{q.title}</h2>
+                                            <p className="text-gray-500 font-medium mb-6">{q.questions.length} Soal</p>
+                                            
+                                            {isDone ? (
+                                                <div className="w-full bg-gray-50 rounded-xl p-4 mt-auto">
+                                                    <p className="text-sm font-bold text-gray-700 mb-2">Hasil Terakhir</p>
+                                                    <div className="flex justify-center gap-4">
+                                                        <div className="flex items-center text-green-600 font-bold"><CheckIcon className="w-4 h-4 mr-1 text-green-600"/> {score.correct}</div>
+                                                        <div className="flex items-center text-red-500 font-bold"><XIcon className="w-4 h-4 mr-1 text-red-500"/> {score.wrong}</div>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <button className={`mt-auto w-full py-3 rounded-xl font-bold text-white shadow-md smooth-transition hover:opacity-90 ${q.theme === 'teal' ? 'bg-rg-teal' : q.theme === 'orange' ? 'bg-rg-orange' : 'bg-rg-brown'}`}>
+                                                    Mulai Kuis
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            {allCompleted && (
+                                <div className="mt-12 flex justify-center">
+                                    <button onClick={() => setView('total')} className="bg-rg-darkteal text-white px-10 py-4 rounded-full font-bold text-lg shadow-xl hover:bg-opacity-90 smooth-transition flex items-center">
+                                        Lihat Total Skor Keseluruhan
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderQuestionContent = () => {
+                if (currentQuestion.type === 'pg') {
+                    return (
+                        <div className="space-y-4">
+                            {currentQuestion.options.map(opt => {
+                                const isSelected = userAnswers[currentQuestionIndex] === opt.id;
+                                let bgClass = isSelected ? `bg-${currentQuiz.colorCode}/10 border-${currentQuiz.colorCode}` : "bg-white hover:bg-gray-50 border-gray-200";
+                                let textClass = isSelected ? `text-${currentQuiz.colorCode} font-semibold` : "text-gray-700";
+
+                                return (
+                                    <button 
+                                        key={opt.id}
+                                        onClick={() => handleAnswerSelect(opt.id, 'pg')}
+                                        className={`w-full text-left p-5 rounded-2xl border-2 smooth-transition flex items-center ${bgClass}`}
+                                    >
+                                        <div className={`w-10 h-10 shrink-0 rounded-full flex items-center justify-center font-bold mr-4 ${isSelected ? `bg-${currentQuiz.colorCode} text-white` : 'bg-gray-100 text-gray-500'}`}>
+                                            {opt.id}
+                                        </div>
+                                        <span className={`text-lg ${textClass}`}>{opt.text}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    );
+                } else if (currentQuestion.type === 'pg-kompleks') {
+                    return (
+                        <div className="space-y-4">
+                            <p className="text-sm font-semibold text-rg-orange mb-2 italic">*Pilih semua jawaban yang benar</p>
+                            {currentQuestion.options.map(opt => {
+                                const isSelected = (userAnswers[currentQuestionIndex] || []).includes(opt.id);
+                                let bgClass = isSelected ? `bg-${currentQuiz.colorCode}/10 border-${currentQuiz.colorCode}` : "bg-white hover:bg-gray-50 border-gray-200";
+                                let borderClass = isSelected ? `border-${currentQuiz.colorCode} bg-${currentQuiz.colorCode}` : "border-gray-300";
+
+                                return (
+                                    <button 
+                                        key={opt.id}
+                                        onClick={() => handleAnswerSelect(opt.id, 'pg-kompleks')}
+                                        className={`w-full text-left p-5 rounded-2xl border-2 smooth-transition flex items-center ${bgClass}`}
+                                    >
+                                        <div className={`w-8 h-8 shrink-0 rounded flex items-center justify-center border-2 mr-4 smooth-transition ${borderClass}`}>
+                                            {isSelected && <CheckIcon className="w-5 h-5 text-white" />}
+                                        </div>
+                                        <span className="text-lg text-gray-700">{opt.text}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    );
+                } else if (currentQuestion.type === 'sesuai-tidak') {
+                    return (
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr>
+                                        <th className="p-4 border-b-2 font-bold text-gray-700 w-3/5">Pernyataan</th>
+                                        <th className="p-4 border-b-2 font-bold text-center text-gray-700 w-1/5">Sesuai</th>
+                                        <th className="p-4 border-b-2 font-bold text-center text-gray-700 w-1/5">Tidak Sesuai</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentQuestion.options.map((opt, i) => {
+                                        const ans = (userAnswers[currentQuestionIndex] || {})[opt.id];
+                                        const getBtnStyle = (val) => {
+                                            const isSelected = ans === val;
+                                            return isSelected ? `bg-${currentQuiz.colorCode} text-white border-${currentQuiz.colorCode} shadow-inner` : "bg-white text-gray-600 border-gray-300 hover:bg-gray-50";
+                                        };
+
+                                        return (
+                                            <tr key={opt.id} className={i % 2 === 0 ? 'bg-gray-50/50' : ''}>
+                                                <td className="p-4 border-b text-gray-800 font-medium">{opt.text}</td>
+                                                <td className="p-4 border-b text-center">
+                                                    <button onClick={() => handleAnswerSelect('Sesuai', 'sesuai-tidak', opt.id)} className={`px-4 py-2 rounded-lg border-2 font-bold smooth-transition ${getBtnStyle('Sesuai')}`}>✓</button>
+                                                </td>
+                                                <td className="p-4 border-b text-center">
+                                                    <button onClick={() => handleAnswerSelect('Tidak Sesuai', 'sesuai-tidak', opt.id)} className={`px-4 py-2 rounded-lg border-2 font-bold smooth-transition ${getBtnStyle('Tidak Sesuai')}`}>✕</button>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
+                    );
+                }
+            };
+
+            const renderQuiz = () => {
+                const progress = ((currentQuestionIndex) / currentQuiz.questions.length) * 100;
+
+                return (
+                    <div className="min-h-screen flex flex-col h-screen">
+                        {/* Header */}
+                        <header className="bg-white shadow-sm px-6 py-4 flex justify-between items-center z-10 shrink-0">
+                            <button onClick={() => setView('menu')} className="text-gray-500 hover:text-gray-800 font-semibold flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" /></svg>
+                                Menu
+                            </button>
+                            <div className="text-lg font-bold text-gray-800 flex items-center">
+                                <span className={`w-8 h-8 rounded-lg flex items-center justify-center text-white mr-3 ${currentQuiz.theme === 'teal' ? 'bg-rg-teal' : currentQuiz.theme === 'orange' ? 'bg-rg-orange' : 'bg-rg-brown'}`}>{currentQuiz.id}</span>
+                                Kuis {currentQuiz.id} &middot; Soal {currentQuestionIndex + 1}/{currentQuiz.questions.length}
+                            </div>
+                            <div className="w-20"></div> {/* Spacer for centering */}
+                        </header>
+
+                        {/* Progress Bar */}
+                        <div className="h-2 w-full bg-gray-200 shrink-0">
+                            <div className={`h-full smooth-transition ${currentQuiz.theme === 'teal' ? 'bg-rg-teal' : currentQuiz.theme === 'orange' ? 'bg-rg-orange' : 'bg-rg-brown'}`} style={{ width: `${progress}%` }}></div>
+                        </div>
+
+                        {/* Main Content Area - Split Screen */}
+                        <div className="flex-1 flex flex-col md:flex-row overflow-hidden bg-gray-50">
+                            
+                            {/* Left: Reading Text */}
+                            <div className="w-full md:w-5/12 bg-white border-r border-gray-200 p-6 md:p-10 overflow-y-auto shadow-inner">
+                                <h3 className={`text-xl font-bold mb-6 pb-4 border-b-2 ${currentQuiz.theme === 'teal' ? 'text-rg-teal border-rg-cyan' : currentQuiz.theme === 'orange' ? 'text-rg-orange border-rg-peach' : 'text-rg-brown border-rg-lightorange'}`}>
+                                    Teks Bacaan: {currentQuiz.textTitle}
+                                </h3>
+                                <div className="text-gray-700 text-reading space-y-4">
+                                    {currentQuiz.textBody.map((paragraph, i) => (
+                                        <p key={i}>{paragraph}</p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Right: Question and Answers */}
+                            <div className="w-full md:w-7/12 p-6 md:p-10 overflow-y-auto flex flex-col">
+                                <div className="max-w-3xl mx-auto w-full flex-1">
+                                    <h2 className="text-2xl font-bold text-gray-800 mb-8 leading-relaxed">
+                                        {currentQuestion.question}
+                                    </h2>
+                                    
+                                    {renderQuestionContent()}
+                                </div>
+
+                                {/* Actions Footer */}
+                                <div className="mt-10 pt-6 border-t border-gray-200 flex justify-end">
+                                    <button 
+                                        onClick={handleNextQuestion}
+                                        disabled={!isAnswerComplete()}
+                                        className={`px-10 py-4 rounded-xl font-bold text-lg text-white shadow-lg smooth-transition flex items-center ${isAnswerComplete() ? (currentQuiz.theme === 'teal' ? 'bg-rg-teal hover:bg-opacity-90' : currentQuiz.theme === 'orange' ? 'bg-rg-orange hover:bg-opacity-90' : 'bg-rg-brown hover:bg-opacity-90') : 'bg-gray-300 cursor-not-allowed'}`}
+                                    >
+                                        {currentQuestionIndex < currentQuiz.questions.length - 1 ? 'Lanjut ke Soal Berikutnya' : 'Selesaikan Kuis'}
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderSummary = () => {
+                const score = scores[currentQuiz.id];
+                const total = currentQuiz.questions.length;
+                const percentage = Math.round((score.correct / total) * 100);
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
+                        <div className="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden text-center my-10">
+                            <div className={`py-10 text-white ${currentQuiz.theme === 'teal' ? 'bg-rg-teal' : currentQuiz.theme === 'orange' ? 'bg-rg-orange' : 'bg-rg-brown'}`}>
+                                <h2 className="text-3xl font-bold mb-2">Kuis Selesai!</h2>
+                                <p className="text-xl opacity-90">{currentQuiz.title}</p>
+                            </div>
+                            
+                            <div className="p-10">
+                                <div className="relative inline-flex items-center justify-center mb-8">
+                                    <svg className="w-40 h-40 transform -rotate-90">
+                                        <circle cx="80" cy="80" r="70" fill="transparent" stroke="#E5E7EB" strokeWidth="12" />
+                                        <circle cx="80" cy="80" r="70" fill="transparent" stroke={percentage >= 70 ? '#22C55E' : percentage >= 40 ? '#F59E0B' : '#EF4444'} strokeWidth="12" strokeDasharray="439.8" strokeDashoffset={439.8 - (percentage / 100) * 439.8} className="transition-all duration-1000 ease-out" />
+                                    </svg>
+                                    <div className="absolute text-4xl font-black text-gray-800">{percentage}%</div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4 mb-10 max-w-md mx-auto">
+                                    <div className="bg-green-50 rounded-2xl p-4 border border-green-100">
+                                        <div className="text-3xl font-black text-green-500 mb-1">{score.correct}</div>
+                                        <div className="text-green-800 font-semibold">Benar</div>
+                                    </div>
+                                    <div className="bg-red-50 rounded-2xl p-4 border border-red-100">
+                                        <div className="text-3xl font-black text-red-500 mb-1">{score.wrong}</div>
+                                        <div className="text-red-800 font-semibold">Salah</div>
+                                    </div>
+                                </div>
+
+                                {/* Review Section */}
+                                <div className="mt-12 text-left border-t-2 border-gray-100 pt-10">
+                                    <h3 className="text-2xl font-bold text-gray-800 mb-8 border-l-4 pl-4 border-rg-orange">Review Jawaban & Pembahasan</h3>
+                                    <div className="space-y-8">
+                                        {currentQuiz.questions.map((q, idx) => {
+                                            const ans = userAnswers[idx];
+                                            let isCorrect = false;
+
+                                            if (q.type === 'pg') {
+                                                isCorrect = ans === q.correct;
+                                            } else if (q.type === 'pg-kompleks') {
+                                                const ansArr = ans || [];
+                                                isCorrect = ansArr.length === q.correct.length && ansArr.every(v => q.correct.includes(v));
+                                            } else if (q.type === 'sesuai-tidak') {
+                                                const ansObj = ans || {};
+                                                let allRight = true;
+                                                for (let key in q.correct) {
+                                                    if (ansObj[key] !== q.correct[key]) allRight = false;
+                                                }
+                                                if (Object.keys(ansObj).length < Object.keys(q.correct).length) allRight = false;
+                                                isCorrect = allRight;
+                                            }
+
+                                            return (
+                                                <div key={idx} className={`p-6 md:p-8 rounded-2xl border-2 shadow-sm ${isCorrect ? 'bg-green-50/50 border-green-200' : 'bg-red-50/50 border-red-200'}`}>
+                                                    <div className="flex items-center mb-4">
+                                                        {isCorrect ? (
+                                                            <><div className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 shadow-md"><CheckIcon/></div> <span className="text-xl font-bold text-green-700">Soal {idx + 1} - Benar</span></>
+                                                        ) : (
+                                                            <><div className="w-8 h-8 rounded-full bg-red-500 text-white flex items-center justify-center mr-3 shadow-md"><XIcon/></div> <span className="text-xl font-bold text-red-700">Soal {idx + 1} - Salah</span></>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-gray-800 font-medium text-lg mb-4">{q.question}</p>
+                                                    <div className="bg-white p-5 rounded-xl border border-gray-100 text-gray-700 text-base leading-relaxed shadow-sm">
+                                                        <span className="font-bold text-gray-900 mb-2 inline-block">Pembahasan:</span><br/>
+                                                        {q.explanation}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col md:flex-row gap-4 mt-12">
+                                    <button onClick={() => setView('menu')} className="flex-1 py-4 rounded-xl font-bold text-lg text-white bg-rg-darkteal shadow-lg hover:bg-opacity-90 smooth-transition">
+                                        Kembali ke Menu Utama
+                                    </button>
+                                    <button onClick={() => handleStartQuiz(currentQuizIndex)} className="flex-1 py-4 rounded-xl font-bold text-lg text-gray-600 bg-gray-100 border-2 border-gray-200 hover:bg-gray-200 smooth-transition">
+                                        Ulangi Kuis Ini
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const renderTotalSummary = () => {
+                const totalQ = quizzes.reduce((acc, q) => acc + q.questions.length, 0);
+                const totalCorrect = Object.values(scores).reduce((acc, curr) => acc + curr.correct, 0);
+                const totalWrong = Object.values(scores).reduce((acc, curr) => acc + curr.wrong, 0);
+                const overallPerc = Math.round((totalCorrect / totalQ) * 100);
+
+                return (
+                    <div className="min-h-screen flex items-center justify-center p-6 bg-rg-darkteal text-white">
+                        <div className="max-w-3xl w-full bg-white text-gray-800 rounded-3xl shadow-2xl p-10 text-center">
+                            <h2 className="text-4xl font-black text-rg-darkteal mb-4">Luar Biasa! 🎉</h2>
+                            <p className="text-xl text-gray-600 font-medium mb-10">Kamu telah menyelesaikan semua kuis Pemahaman Tekstual.</p>
+
+                            <div className="flex flex-col md:flex-row justify-center items-center gap-10 mb-12">
+                                <div className="text-center">
+                                    <div className="text-6xl font-black text-rg-orange mb-2">{overallPerc}%</div>
+                                    <div className="text-lg font-bold text-gray-500 uppercase tracking-wider">Skor Akhir</div>
+                                </div>
+                                <div className="h-24 w-px bg-gray-200 hidden md:block"></div>
+                                <div className="flex gap-8">
+                                    <div className="text-center">
+                                        <div className="text-4xl font-black text-green-500 mb-1">{totalCorrect}</div>
+                                        <div className="text-gray-500 font-semibold">Total Benar</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-4xl font-black text-red-500 mb-1">{totalWrong}</div>
+                                        <div className="text-gray-500 font-semibold">Total Salah</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10 text-left">
+                                {quizzes.map(q => (
+                                    <div key={q.id} className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                        <div className="text-sm font-bold text-gray-500 mb-1">Kuis {q.id}</div>
+                                        <div className="font-semibold text-gray-800 mb-2 truncate">{q.title}</div>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-green-600 font-bold">{scores[q.id].correct} Benar</span>
+                                            <span className="text-red-500 font-bold">{scores[q.id].wrong} Salah</span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <button onClick={() => setView('menu')} className="bg-rg-teal text-white px-10 py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-opacity-90 smooth-transition">
+                                Kembali ke Beranda
+                            </button>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="antialiased">
+                    {view === 'menu' && renderMenu()}
+                    {view === 'quiz' && renderQuiz()}
+                    {view === 'summary' && renderSummary()}
+                    {view === 'total' && renderTotalSummary()}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

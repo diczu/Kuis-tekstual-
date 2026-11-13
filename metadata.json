@@ -1,0 +1,6 @@
+{
+  "name": "Kuis Pemahaman Tekstual",
+  "description": "Aplikasi kuis interaktif pemahaman tekstual Bahasa Indonesia dengan pembahasan lengkap dan evaluasi skor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
